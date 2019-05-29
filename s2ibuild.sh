@@ -44,3 +44,5 @@ s2i build ${DRONE_WORKSPACE_BASE} $S2IOPTS --context-dir=${PLUGIN_CONTEXT-./} ${
 
 # push ?
 [ "$S2I_PUSH" == "true" ] && echo "Pushing $PLUGIN_TARGET" && docker push ${PLUGIN_TARGET} || exit 1
+
+exit 0
