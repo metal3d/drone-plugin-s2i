@@ -43,6 +43,10 @@ echo "Docker daemon is ready, building..."
 s2i build ${DRONE_WORKSPACE_BASE} $S2IOPTS --context-dir=${PLUGIN_CONTEXT-./} ${PLUGIN_IMAGE} ${PLUGIN_TARGET} || exit 1
 
 # push ?
-[ "$S2I_PUSH" == "true" ] && echo "Pushing $PLUGIN_TARGET" && docker push ${PLUGIN_TARGET} || exit 1
+if [ "$S2I_PUSH" == "true" ]; then
+    echo "Pushing $PLUGIN_TARGET"
+    docker push ${PLUGIN_TARGET} || exit 1
+    echo "Image pushed"
+fi
 
 exit 0
