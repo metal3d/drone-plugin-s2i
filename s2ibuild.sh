@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Author: Patrice Ferlet <metal3d@gmail.com>
 # License: MIT
@@ -17,25 +17,27 @@ if [ "$PLUGIN_INCREMENTAL" == "true" ]; then
     S2IOPTS="--incremental"
 fi
 
+# Docker daemon checker
+RETVAL="ko"
 checkdocker(){
-    echo -e "GET /version HTTP/1.0\r\n" | nc -U /var/run/docker.sock 2>/dev/null | grep Platform 2>&1 1>/dev/null
-    return $?
+    res=$(echo -e "GET /version HTTP/1.0\r\n" | nc -U /var/run/docker.sock 2>/dev/null)
+    echo "$res" | grep "Platform" && RETVAL="ok" || :
 }
 
 # Launching Docker
 nohup dockerd -s overlay2 $OPTS  </dev/null >/dev/null 2>&1 &
 
-COUNT=0
-echo -e "Waiting for docker daemon "
-sleep 3
+# Wait for docker daemon
+echo -e "Waiting for docker daemon"
 
-checkdocker
-until [ $? == 0 ]; do
+COUNT=0
+checkdocker || :
+until [ $RETVAL == "ok" ]; do
     sleep 1
+    echo $RETVAL
     COUNT=$((COUNT+1))
-    [ $COUNT -gt 10 ] && exit 1
-    echo -e "."
-    checkdocker
+    [ $COUNT -gt 10 ] && echo "Docker cannot start" && exit 1
+    checkdocker || :
 done
 echo
 
@@ -48,5 +50,7 @@ if [ "$PLUGIN_PUSH" == "true" ]; then
     docker push ${PLUGIN_TARGET} || exit 1
     echo "Image pushed"
 fi
+
+docker system prune -f || :
 
 exit 0
