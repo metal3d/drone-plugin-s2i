@@ -42,13 +42,10 @@ echo
 
 
 # build DRONE env
-drone_env=""
-for e in $(env | grep DRONE); do drone_env=$drone_env" --env=$e"; done
-
 echo "Docker daemon is ready, building..."
 
 set -x
-s2i build ${DRONE_WORKSPACE_BASE} $S2IOPTS --context-dir=${PLUGIN_CONTEXT-./} ${PLUGIN_IMAGE} ${PLUGIN_TARGET} ${drone_env} || exit 1
+s2i build ${DRONE_WORKSPACE_BASE} $S2IOPTS --context-dir=${PLUGIN_CONTEXT-./} ${PLUGIN_IMAGE} ${PLUGIN_TARGET} --env=DRONE=true || exit 1
 set +x
 
 # push ?
