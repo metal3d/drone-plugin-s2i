@@ -34,15 +34,18 @@ COUNT=0
 checkdocker || :
 until [ $RETVAL == "ok" ]; do
     sleep 1
-    echo $RETVAL
     COUNT=$((COUNT+1))
     [ $COUNT -gt 10 ] && echo "Docker cannot start" && exit 1
     checkdocker || :
 done
 echo
 
+
+# build DRONE env
 echo "Docker daemon is ready, building..."
-s2i build ${DRONE_WORKSPACE_BASE} $S2IOPTS --keep-symlinks --context-dir=${PLUGIN_CONTEXT-./} ${PLUGIN_IMAGE} ${PLUGIN_TARGET} || exit 1
+set -x
+s2i build ${DRONE_WORKSPACE_BASE} $S2IOPTS --context-dir=${PLUGIN_CONTEXT-./} ${PLUGIN_IMAGE} ${PLUGIN_TARGET} --keep-symlinks --env=DRONE=true || exit 1
+set +x
 
 # push ?
 if [ "$PLUGIN_PUSH" == "true" ]; then
@@ -51,6 +54,7 @@ if [ "$PLUGIN_PUSH" == "true" ]; then
     echo "Image pushed"
 fi
 
+set -x
 docker system prune -f || :
 
 exit 0
