@@ -10,16 +10,47 @@ To be able to have the same build solution, you need this plugin.
 
 In your .drone.yml file, you can use `metal3d/drone-plugin-s2i` - you can use that paramters:
 
-- `image` (mandatory) is the "s2i" image that assemble the target image
-- `target` (mandatory) is the target image built with s2i
+- `image` (mandatory) is the "s2i" image that assembles the `target` image
+- `target` (mandatory) is the target image built with s2i `image`
 - `push` (boolean, default to false) will push your image after the build
 - `context` (string, default to "./") is the context directory inside you repository
 - `incremental` (boolean, default to false) perform an incremental build if possible
 - `registry` is the registry you want to login (login not yet supported)
 - `insecure` (boolean, default to false) to use the `registry` as "insecure" (http instead of https)
+- `username` if set with `password`, try to authenticate `registry` with that user
+- `password` is the password used to authenticate user 
 
 
 Exemple, with `docker-registry:5000` as a private registry:
+
+New format (v2 tags):
+```yaml
+kind: pipeline
+name: default
+
+steps:
+  - name: s2i-build
+    image: metal3d/drone-plugin-s2i:v2
+    pull: always
+    settings:
+      registry: docker-registry:5000
+      insecure: true
+      builder: docker-registry:5000/metal3d/nginx:1.15-s2i 
+      target: docker-registry:5000/metal3d/httptest
+      tags:
+        - latest
+        - ${DRONE_TAG}
+      push: true
+      context: "./src"
+      increental: false
+      user:
+        from_secret: registry-username
+      password:
+        from_secret: registry-password
+```
+
+
+Old format (v1 tags):
 
 ```yaml
 kind: pipeline
@@ -27,13 +58,16 @@ name: default
 
 steps:
   - name: s2i-build
-    image: metal3d/drone-plugin-s2i
+    image: metal3d/drone-plugin-s2i:v1
     pull: always
     settings:
       registry: docker-registry:5000
       insecure: true
       image: docker-registry:5000/metal3d/nginx:1.15-s2i 
       target: docker-registry:5000/metal3d/httptest
+      push: true
+      context: "./src"
+      increental: false
 ```
 
 Note that in kubernetes, "docker-registry" can be the service name of your private registry. For example, if your service `docker-registry` resides in the "registry" namespace, you can use `docker-registry.registry:5000`.
