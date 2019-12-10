@@ -6,9 +6,11 @@
 
 To be able to have the same build solution, you need this plugin.
 
+**Before using this plugin**, please make sure that you know how is working "source to image".
+
 ## Usage
 
-In your .drone.yml file, you can use `metal3d/drone-plugin-s2i` - you can use that paramters:
+In your .drone.yml file, you can use `metal3d/drone-plugin-s2i` - you can use these paramters:
 
 - `image` (mandatory) is the "s2i" image that assembles the `target` image
 - `target` (mandatory) is the target image built with s2i `image`
@@ -19,9 +21,10 @@ In your .drone.yml file, you can use `metal3d/drone-plugin-s2i` - you can use th
 - `insecure` (boolean, default to false) to use the `registry` as "insecure" (http instead of https)
 - `username` if set with `password`, try to authenticate `registry` with that user
 - `password` is the password used to authenticate user 
+- `cert` (optional) is the base64 encoded certificate to write in `/etc/docker/certs.d/${registry}/ca.crt` where `registry` is the corresponding parameter. One more time, please use a secret to store the certificate.
 
 
-Exemple, with `docker-registry:5000` as a private registry:
+Exemple, with `docker-registry:5000` as a private registry, and nginx:1.15-s2i image you created to build your own images:
 
 New format (v2 tags):
 ```yaml

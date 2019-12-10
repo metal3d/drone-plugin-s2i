@@ -6,6 +6,12 @@
 [ "$PLUGIN_BUILDER" == "" ] && echo "You must set BUILDER paramter in settings" && exit 1
 [ "$PLUGIN_TARGET" == "" ] && echo "You must set image target in settings" && exit 1
 
+if [ $PLUGIN_CERT != "" ]; then
+    mkdir -p /etc/docker/certs.d/$PLUGIN_REGISTRY
+    echo "$PLUGIN_CERT" | base64 -d > /etc/docker/certs.d/$PLUGIN_REGISTRY/ca.crt
+
+fi
+
 # if not target given, use "latest" tag per default
 [ "$PLUGIN_TARGET" == "" ] && PLUGIN_TARGET="latest"
 
